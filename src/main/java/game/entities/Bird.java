@@ -10,7 +10,7 @@ public class Bird extends Entity {
     public float rotA = (float)(Math.random() + 1.0) * 0.01f;
     
     public Bird(int x, int y, int z, int xRot, int yRot) {
-        super(x, y - 40, z, xRot, yRot);
+        super(x, y + 40, z, xRot, yRot);
         this.model = new Model("/bird.obj", 6);
         this.model.flipYZ();
         this.model.setRotation(xRot, yRot);

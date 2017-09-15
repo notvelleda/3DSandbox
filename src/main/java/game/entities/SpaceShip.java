@@ -4,7 +4,7 @@ import game.*;
 
 public class SpaceShip extends Entity {
     public SpaceShip(int x, int y, int z, int xRot, int yRot) {
-        super(x, y - 15, z, xRot, yRot);
+        super(x, y + 15, z, xRot, yRot);
         this.model = new Model(new int[][] {
 			{80,0,0,0,30,-20,0,-30,-20,CColor.GREY3.getInt()},
 			{80,0,0,0,30,20,0,30,10,CColor.GREEN.getInt()},

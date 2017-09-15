@@ -10,7 +10,7 @@ public class Pig extends Entity {
     public float rotA = (float)(Math.random() + 1.0) * 0.01f;
     
     public Pig(int x, int y, int z, int xRot, int yRot) {
-        super(x, y - 6, z, xRot, yRot);
+        super(x, y + 6, z, xRot, yRot);
         this.model = new Model("/piggy.obj");
         this.model.flipYZ();
         this.model.setRotation(xRot, yRot);
