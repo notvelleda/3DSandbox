@@ -1330,7 +1330,7 @@ public class Game extends JPanel implements Runnable {
     }
     
     public static void main(String[] args) {
-        JFrame frame = new JFrame("ThreeDee");
+        JFrame frame = new JFrame("Game");
         Game game = new Game(false);
         game.setPreferredSize(new Dimension(768, 528));
         game.setFocusable(true);
