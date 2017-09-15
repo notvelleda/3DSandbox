@@ -72,72 +72,74 @@ public class PlayerController implements KeyListener {
     }
     
     public void update() {
-        this.controller.poll();
-        Component[] components = this.controller.getComponents();
-        for(int i = 0; i < components.length; i++) {
-            Component c = components[i];
-            
-            if (this.menuState == 0) {
-                if (c.getName().equals("x")) {
-                    this.dx = this.dx2 + (int) -(c.getPollData() * 3);
-                }
-                if (c.getName().equals("y")) {
-                    this.dz = this.dz2 + (int) -(c.getPollData() * 5);
-                }
-                if (c.getName().equals("rx")) {
-                    this.dxRot = this.dxRot2 + (int) -(c.getPollData() * 2);
-                }
-                if (c.getName().equals("ry")) {
-                    this.dyRot = this.dyRot2 + (int) -(c.getPollData() * 2);
-                }
-            }
-            
-            if (c.getPollData() == 1.0) {
+        if (this.controller != null) {
+            this.controller.poll();
+            Component[] components = this.controller.getComponents();
+            for(int i = 0; i < components.length; i++) {
+                Component c = components[i];
+                
                 if (this.menuState == 0) {
-                    if (c.getName().equals("Y")) {
-                        this.menuState = Game.MENU_ADDENTITY;
-                        this.menuSel = -1;
-                        this.tempMenuSel = 0;
-                        this.xbs = 0;
+                    if (c.getName().equals("x")) {
+                        this.dx = this.dx2 + (int) -(c.getPollData() * 3);
                     }
-                    if (c.getName().equals("X")) {
-                        this.menuState = Game.MENU_DELENTITY;
-                        this.menuSel = -1;
-                        this.tempMenuSel = 0;
-                        this.xbs = 0;
+                    if (c.getName().equals("y")) {
+                        this.dz = this.dz2 + (int) -(c.getPollData() * 5);
                     }
-                    if (i == 7) {
-                        this.menuState = Game.MENU_GAMEMENU;
-                        this.menuSel = -1;
-                        this.tempMenuSel = 0;
-                        this.xbs = 0;
+                    if (c.getName().equals("rx")) {
+                        this.dxRot = this.dxRot2 + (int) -(c.getPollData() * 2);
                     }
-                } else if (this.menuState > 0) {
-                    if (c.getName().equals("X")) {
-                        if (c.getPollData() == 1 && this.xbs == 0) {
-                            this.xbs = 1;
-                            this.tempMenuSel ++;
-                            if (this.tempMenuSel >= this.menuItems)
-                                this.tempMenuSel = 0;
-                        }
-                    }
-                    if (c.getName().equals("A")) {
-                        if (c.getPollData() == 1 && this.abs == 0) {
-                            this.abs = 1;
-                            this.menuSel = this.tempMenuSel;
-                        }
-                    }
-                    if (c.getName().equals("B")) {
-                        this.menuState = 0;
+                    if (c.getName().equals("ry")) {
+                        this.dyRot = this.dyRot2 + (int) -(c.getPollData() * 2);
                     }
                 }
+                
+                if (c.getPollData() == 1.0) {
+                    if (this.menuState == 0) {
+                        if (c.getName().equals("Y")) {
+                            this.menuState = Game.MENU_ADDENTITY;
+                            this.menuSel = -1;
+                            this.tempMenuSel = 0;
+                            this.xbs = 0;
+                        }
+                        if (c.getName().equals("X")) {
+                            this.menuState = Game.MENU_DELENTITY;
+                            this.menuSel = -1;
+                            this.tempMenuSel = 0;
+                            this.xbs = 0;
+                        }
+                        if (i == 7) {
+                            this.menuState = Game.MENU_GAMEMENU;
+                            this.menuSel = -1;
+                            this.tempMenuSel = 0;
+                            this.xbs = 0;
+                        }
+                    } else if (this.menuState > 0) {
+                        if (c.getName().equals("X")) {
+                            if (c.getPollData() == 1 && this.xbs == 0) {
+                                this.xbs = 1;
+                                this.tempMenuSel ++;
+                                if (this.tempMenuSel >= this.menuItems)
+                                    this.tempMenuSel = 0;
+                            }
+                        }
+                        if (c.getName().equals("A")) {
+                            if (c.getPollData() == 1 && this.abs == 0) {
+                                this.abs = 1;
+                                this.menuSel = this.tempMenuSel;
+                            }
+                        }
+                        if (c.getName().equals("B")) {
+                            this.menuState = 0;
+                        }
+                    }
+                }
+                
+                if (c.getName().equals("X") && c.getPollData() == 0 && this.xbs == 1)
+                    this.xbs = 0;
+                if (c.getName().equals("A") && c.getPollData() == 0 && this.abs == 1)
+                    this.abs = 0;
             }
-            
-            if (c.getName().equals("X") && c.getPollData() == 0 && this.xbs == 1)
-                this.xbs = 0;
-            if (c.getName().equals("A") && c.getPollData() == 0 && this.abs == 1)
-                this.abs = 0;
-         }
+        }
     }
     
     protected void _keyPressed(int keyCode) {
