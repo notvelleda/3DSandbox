@@ -398,7 +398,7 @@ public class Game extends JPanel implements Runnable {
                 "Culling: ",
                 "Solid polygons: ",
                 "Show FPS: ",
-                "Dark color palette: ",
+                "Colodore palette: ",
                 "Select shader"
             };
             

@@ -95,8 +95,8 @@ public class CColor {
     }
     
     public static void setPalette1() {
-        // Alternate palette from http://unusedino.de/ec64/technical/misc/vic656x/colors/
-        CColor.BLACK = new CColor("000000", 0);
+        // Alternate palette from http://www.pepto.de/projects/colorvic/2001/
+        /*CColor.BLACK = new CColor("000000", 0);
         CColor.WHITE = new CColor("FFFFFF", 1);
         CColor.RED = new CColor("68372B", 2);
         CColor.CYAN = new CColor("70A4B2", 3);
@@ -111,7 +111,24 @@ public class CColor {
         CColor.GREY2 = new CColor("6C6C6C", 12);
         CColor.LIGHTGREEN = new CColor("9AD284", 13);
         CColor.LIGHTBLUE = new CColor("6C5EB5", 14);
-        CColor.GREY3 = new CColor("959595", 15);
+        CColor.GREY3 = new CColor("959595", 15);*/
+        // Alternate palette from http://www.colodore.com/
+        CColor.BLACK = new CColor("000000", 0);
+        CColor.WHITE = new CColor("FFFFFF", 1);
+        CColor.RED = new CColor("813338", 2);
+        CColor.CYAN = new CColor("75cec8", 3);
+        CColor.VIOLET = new CColor("8e3c97", 4);
+        CColor.GREEN = new CColor("56ac4d", 5);
+        CColor.BLUE = new CColor("2e2c9b", 6);
+        CColor.YELLOW = new CColor("edf171", 7);
+        CColor.ORANGE = new CColor("8e5029", 8);
+        CColor.BROWN = new CColor("553800", 9);
+        CColor.LIGHTRED = new CColor("c46c71", 10);
+        CColor.GREY1 = new CColor("4a4a4a", 11);
+        CColor.GREY2 = new CColor("7b7b7b", 12);
+        CColor.LIGHTGREEN = new CColor("a9ff9f", 13);
+        CColor.LIGHTBLUE = new CColor("706deb", 14);
+        CColor.GREY3 = new CColor("b2b2b2", 15);
         
         colors = new CColor[] {
             CColor.BLACK,CColor.WHITE,CColor.RED,CColor.CYAN,
