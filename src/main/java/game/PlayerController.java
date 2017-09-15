@@ -139,6 +139,12 @@ public class PlayerController implements KeyListener {
                 if (c.getName().equals("A") && c.getPollData() == 0 && this.abs == 1)
                     this.abs = 0;
             }
+        } else {
+            this.dx = this.dx2;
+            this.dy = this.dy2;
+            this.dz = this.dz2;
+            this.dxRot = this.dxRot2;
+            this.dyRot = this.dyRot2;
         }
     }
     
