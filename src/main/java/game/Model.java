@@ -54,6 +54,22 @@ public class Model {
         this.yRot = yRot;
     }
     
+    public void invertZ() {
+        for (int i = 0; i < this.triangles.length; i ++) {
+            this.triangles[i][1] = -this.triangles[i][1];
+            this.triangles[i][4] = -this.triangles[i][4];
+            this.triangles[i][7] = -this.triangles[i][7];
+        }
+    }
+    
+    public void addZ(int z) {
+        for (int i = 0; i < this.triangles.length; i ++) {
+            this.triangles[i][1] += z;
+            this.triangles[i][4] += z;
+            this.triangles[i][7] += z;
+        }
+    }
+    
     public void flipYZ() { // Flip Y and Z axes
         int[][] vertices = new int[this.triangles.length * 3][3];
         int[] colors = new int[this.triangles.length];

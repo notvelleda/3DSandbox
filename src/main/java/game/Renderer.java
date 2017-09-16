@@ -16,6 +16,7 @@ import game.shaders.*;
 
 public class Renderer {
     public static final int MAX_POLYGONS = 32768;
+    public static Renderer inst;
     
     // Engine settings:
 	int near_Clipping_Plane = 10;		// Objects closer than this value are culled.
@@ -125,6 +126,8 @@ public class Renderer {
         generate_LUT();
         
         entities.clear();
+        
+        inst = this;
     }
     
     private void generate_LUT() {
