@@ -65,8 +65,9 @@ public class PlayerController implements KeyListener {
                 System.out.println("");
             }
         }*/
+        String os = System.getProperty("os.name").toLowerCase();
         
-        if (ca.length > 0) {
+        if (ca.length > 0 && (os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0 || os.indexOf("aix") >= 0)) {
             this.controller = ca[0];
         }
     }
