@@ -200,8 +200,13 @@ public class PlayerController implements KeyListener {
                 this.tempMenuSel = 0;
                 this.xbs = 0;
             }
+        } else if (keyAction == 17 || keyAction == 18) {
+            if (this.menuState == 0) {
+                for (Entity e : Renderer.inst.entities) {
+                    if (e.onTrigger()) break;
+                }
+            }
 		}
-
 	}
 
 	protected void _keyReleased(int keyCode) {
