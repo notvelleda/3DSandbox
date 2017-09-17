@@ -242,6 +242,7 @@ public class Game extends JPanel implements Runnable {
                 "Solid polygons: ",
                 "Show FPS: ",
                 "Colodore palette: ",
+                "Shader dithering: ",
                 "Select shader"
             };
             
@@ -249,7 +250,8 @@ public class Game extends JPanel implements Runnable {
                 this.renderer.culling,
                 this.renderer.filled,
                 drawStats,
-                darkPalette
+                darkPalette,
+                TEDDither.ditherImage
             };
             
             int i = 0;
@@ -281,16 +283,23 @@ public class Game extends JPanel implements Runnable {
                         drawStats = !drawStats;
                         break;
                     case 3:
-                        darkPalette = !darkPalette;
-                        if (darkPalette) {
-                            CColor.setPalette1();
+                        if (this.renderer.shader.getClass().getName() == "game.shaders.Flat") {
+                            darkPalette = !darkPalette;
+                            if (darkPalette) {
+                                CColor.setPalette1();
+                            } else {
+                                CColor.setPalette0();
+                            }
+                            buffer2.setColor(CColor.LIGHTBLUE.getColor());
+                            buffer2.fillRect(0, 0, scr_Width + 64, scr_Height + 64);
                         } else {
-                            CColor.setPalette0();
+                            optionvalues[this.pc.menuSel] = !optionvalues[this.pc.menuSel];
                         }
-                        buffer2.setColor(CColor.LIGHTBLUE.getColor());
-                        buffer2.fillRect(0, 0, scr_Width + 64, scr_Height + 64);
                         break;
                     case 4:
+                        TEDDither.ditherImage = !TEDDither.ditherImage;
+                        break;
+                    case 5:
                         this.pc.menuState = MENU_SHADERS;
                         this.pc.menuSel = -1;
                         this.pc.tempMenuSel = 0;
@@ -512,13 +521,32 @@ public class Game extends JPanel implements Runnable {
                 try {
                     Constructor constructor = clazz.getConstructor(new Class[] {});
                     this.renderer.shader = (Shader) constructor.newInstance();
+                    if (clazz.getName() == "game.shaders.Flat") {
+                        darkPalette = !darkPalette;
+                        if (darkPalette) {
+                            CColor.setPalette1();
+                        } else {
+                            CColor.setPalette0();
+                        }
+                        buffer2.setColor(CColor.LIGHTBLUE.getColor());
+                        buffer2.fillRect(0, 0, scr_Width + 64, scr_Height + 64);
+                    } else {
+                        TEDDither.setTEDPalette();
+                        buffer2.setColor(CColor.LIGHTBLUE.getColor());
+                        buffer2.fillRect(0, 0, scr_Width + 64, scr_Height + 64);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         }
         
-		buffer2.drawImage(bufferImage, 32, 32, scr_Width, scr_Height, null);
+        if (this.renderer.shader.getClass().getName() != "game.shaders.Flat") {
+            buffer2.drawImage(TEDDither.dither(bufferImage), 32, 32, scr_Width, scr_Height, null);
+        } else {
+            buffer2.drawImage(bufferImage, 32, 32, scr_Width, scr_Height, null);
+        }
+        
 		originalBuffer.drawImage(bufferImage2, 0, 0, this.getWidth(), this.getHeight(), null);
         
         if (drawStats) {

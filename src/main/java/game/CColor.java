@@ -68,6 +68,18 @@ public class CColor {
         return "Color(#" + this.hex + ")";
     }
     
+    public byte getRed() {
+        return (byte) this.color.getRed();
+    }
+    
+    public byte getGreen() {
+        return (byte) this.color.getGreen();
+    }
+    
+    public byte getBlue() {
+        return (byte) this.color.getBlue();
+    }
+    
     public static void setPalette0() {
         // Default palette
         CColor.BLACK = new CColor("000000", 0);
