@@ -92,6 +92,13 @@ public class PlayerController implements KeyListener {
                     if (c.getName().equals("ry")) {
                         this.dyRot = this.dyRot2 + (int) -(c.getPollData() * 2);
                     }
+                    if (c.getName().equals("z") || c.getName().equals("rz")) {
+                        if (c.getPollData() > 0) {
+                            for (Entity e : Renderer.inst.entities) {
+                                if (e.onTrigger()) break;
+                            }
+                        }
+                    }
                 }
                 
                 if (c.getPollData() == 1.0) {

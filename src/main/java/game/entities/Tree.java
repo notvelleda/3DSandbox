@@ -20,5 +20,6 @@ public class Tree extends Entity {
             {0,0,30,0,-20,20,-20,0,20,CColor.LIGHTGREEN.getInt()}
         });
         this.model.setRotation(xRot, yRot);
+        this.aabb = this.model.calcAABB();
     }
 }

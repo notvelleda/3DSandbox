@@ -3,6 +3,8 @@ package game.entities;
 import game.*;
 
 public class Weapon extends Entity {
+    long time = System.currentTimeMillis();
+    
     public Weapon(int x, int y, int z, int xRot, int yRot) {
         super(x, y, z, xRot, yRot);
         this.model = new Model("/scarh.obj", 10);
@@ -17,5 +19,16 @@ public class Weapon extends Entity {
         this.y = r.getCamY() - 3;
         this.z = r.getCamZ() - 2;
         this.model.setRotation((-r.getXRot()) + 192, r.getYRot());
+    }
+    
+    public boolean onTrigger() {
+        if (System.currentTimeMillis() - time > 250) {
+            Renderer r = Renderer.inst;
+            Entity e = (Entity) new Projectile(r.getCamX(), r.getCamY(), r.getCamZ(), r.getXRot(), r.getYRot());
+            r.entities.add(e);
+            time = System.currentTimeMillis();
+            return true;
+        }
+        return false;
     }
 }

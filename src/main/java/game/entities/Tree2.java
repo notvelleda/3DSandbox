@@ -7,5 +7,6 @@ public class Tree2 extends Entity {
         super(x, y + 22, z, xRot, yRot);
         this.model = new Model("/tree2.obj", 12);
         this.model.setRotation(xRot, yRot);
+        this.aabb = this.model.calcAABB();
     }
 }

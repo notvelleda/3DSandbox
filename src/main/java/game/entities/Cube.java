@@ -7,5 +7,6 @@ public class Cube extends Entity {
         super(x, y, z, xRot, yRot);
         this.model = new Model("/cube.obj", 1.75f);
         this.model.setRotation(xRot, yRot);
+        this.aabb = this.model.calcAABB();
     }
 }

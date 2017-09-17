@@ -2,12 +2,15 @@ package game;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Arrays;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.FileReader;
 import java.io.File;
+
+import game.phys.AABB;
 
 public class Model {
     public int xRot;
@@ -47,6 +50,52 @@ public class Model {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    
+    public int[][] createBox(int x, int y, int z, int l, int w, int h) {
+        int[][] triangles = new int[12][10];
+        l += x;
+        w += z;
+        h += y;
+        int[][] vertices = new int[][] {
+            {x, z, h}, {x, z, y}, {x, w, h}, {x, w, y},
+            {l, z, h}, {l, z, y}, {l, w, h}, {l, w, y}
+        };
+        int[] vloc = new int[] {1,2,4,1,4,3,5,6,8,5,8,7,6,2,1,6,1,5,8,4,3,8,3,7,4,2,6,4,6,8,3,1,5,3,5,7};
+        int j = 0;
+        for (int i = 0; i < 12; i ++) {
+            for (int k = 0; k < 3; k ++) {
+                triangles[i][k * 3] = vertices[vloc[j] - 1][0];
+                triangles[i][k * 3 + 1] = vertices[vloc[j] - 1][1];
+                triangles[i][k * 3 + 2] = vertices[vloc[j] - 1][2];
+                j ++;
+            }
+            triangles[i][9] = CColor.BLACK.getInt();
+        }
+        
+        return triangles;
+    }
+    
+    public AABB calcAABB() {
+        int[] verticesX = new int[this.triangles.length * 3];
+        int[] verticesZ = new int[this.triangles.length * 3];
+        
+        for (int i = 0; i < this.triangles.length; i ++) {
+            verticesX[i * 3] = this.triangles[i][0];
+            verticesX[i * 3 + 1] = this.triangles[i][3];
+            verticesX[i * 3 + 2] = this.triangles[i][6];
+            verticesZ[i * 3] = this.triangles[i][1];
+            verticesZ[i * 3 + 1] = this.triangles[i][4];
+            verticesZ[i * 3 + 2] = this.triangles[i][7];
+        }
+        
+        Arrays.sort(verticesX);
+        Arrays.sort(verticesZ);
+        
+        AABB aabb = new AABB(verticesX[0], verticesZ[0], verticesX[verticesX.length - 1], verticesZ[verticesZ.length - 1]);
+        //System.out.println(aabb);
+        
+        return aabb;
     }
     
     public void setRotation(int xRot, int yRot) {
@@ -146,9 +195,23 @@ public class Model {
             System.out.println("Loaded model \"" + this.name + "\" (" + filename + "): " + lineCount + " lines, " + triangles.size() + " tris");
             
             int[][] model = (int[][]) triangles.toArray(new int[triangles.size()][10]);
+            int[][] model2 = new int[model.length][10];
+            int[][] model3 = new int[model.length][10];
             
-            this.triangles = model.clone();
-            models.put(filename, model.clone());
+            // Copy model twice
+            int i = 0;
+            for (int[] k : model) {
+                int j = 0;
+                for (int l : k) {
+                    model2[i][j] = l;
+                    model3[i][j] = l;
+                    j ++;
+                }
+                i ++;
+            }
+            
+            this.triangles = model2;
+            models.put(filename, model3);
         }
     }
 }

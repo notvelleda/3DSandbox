@@ -14,6 +14,8 @@ public class Pig extends Entity {
         this.model = new Model("/piggy.obj");
         this.model.flipYZ();
         this.model.setRotation(xRot, yRot);
+        this.aabb = this.model.calcAABB();
+        this.health = 10f;
         this.timeOffs = (float)Math.random() * 1239813.0f;
     }
     
@@ -23,10 +25,8 @@ public class Pig extends Entity {
         this.rot += this.rotA;
         this.rotA = (float) ((double) this.rotA * 0.99);
         this.rotA = (float) ((double) this.rotA + (Math.random() - Math.random()) * Math.random() * Math.random() * 0.07999999821186066);
-        this.xd = (float) Math.sin(this.rot) * 2;
-        this.zd = (float) Math.cos(this.rot) * 2;
-        this.x += this.xd;
-        this.z += this.zd;
+        this.moveRelative((int) (Math.cos(this.rot) * 3), 0, (int) (Math.sin(this.rot) * 3));
+        this.move();
         this.model.xRot = (int) (Math.sin(System.nanoTime() / 1.75E9 * 1.0f + this.timeOffs) * 140);
     }
 }

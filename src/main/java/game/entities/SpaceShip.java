@@ -32,5 +32,6 @@ public class SpaceShip extends Entity {
 			{-30,0,20,0,30,10,0,30,20,CColor.GREEN.getInt()}
 		});
         this.model.setRotation(xRot, yRot);
+        this.aabb = this.model.calcAABB();
     }
 }

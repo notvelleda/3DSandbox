@@ -14,6 +14,8 @@ public class Bird extends Entity {
         this.model = new Model("/bird.obj", 6);
         this.model.flipYZ();
         this.model.setRotation(xRot, yRot);
+        this.aabb = this.model.calcAABB();
+        this.health = 10f;
         this.timeOffs = (float)Math.random() * 1239813.0f;
     }
     

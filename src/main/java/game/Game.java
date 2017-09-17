@@ -15,6 +15,7 @@ import java.lang.reflect.Constructor;
 import java.net.*;
 
 import game.entities.*;
+import game.phys.AABB;
 
 public class Game extends JPanel implements Runnable {
 	boolean drawStats = false;
@@ -55,6 +56,8 @@ public class Game extends JPanel implements Runnable {
     
     int scr_Width;
     int scr_Height;
+    
+    //public AABB playerAABB = new AABB();
 
 	public Game() {}
     
@@ -133,6 +136,21 @@ public class Game extends JPanel implements Runnable {
         this.pc.update();
         
 		this.renderer.rotateCameraRelative(this.pc.dxRot, this.pc.dyRot);
+        
+        /*int xd = this.pc.dx;
+        int yd = this.pc.dy;
+        int zd = this.pc.dz;
+        
+        ArrayList<AABB> arrayList = Renderer.inst.getEntityAABBs();
+        AABB aabb = Renderer.playerAABB.cloneMove(this.renderer.getCamX() + xd, 0);
+        int n;
+        for (n = 0; n < arrayList.size(); ++n) {
+            xd = arrayList.get(n).clipXCollide(Renderer.playerAABB, xd);
+        }
+        aabb = aabb.cloneMove(0, this.renderer.getCamZ() + zd);
+        for (n = 0; n < arrayList.size(); ++n) {
+            zd = arrayList.get(n).clipZCollide(Renderer.playerAABB, zd);
+        }*/
 
 		this.renderer.moveCameraRelative(this.pc.dx, this.pc.dy, this.pc.dz);
 	}
@@ -171,7 +189,7 @@ public class Game extends JPanel implements Runnable {
                 try {
                     Class[] types = {java.lang.Integer.TYPE, java.lang.Integer.TYPE, java.lang.Integer.TYPE, java.lang.Integer.TYPE, java.lang.Integer.TYPE};
                     Constructor constructor = clazz.getConstructor(types);
-                    Entity instance = (Entity) constructor.newInstance(this.renderer.getCamX(), 0, this.renderer.getCamY(), this.renderer.getXRot(), 0);
+                    Entity instance = (Entity) constructor.newInstance(this.renderer.getCamX(), 0, this.renderer.getCamZ(), this.renderer.getXRot(), 0);
                     this.renderer.entities.add(instance);
                 } catch (Exception e) {
                     e.printStackTrace();

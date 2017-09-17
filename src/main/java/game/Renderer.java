@@ -13,10 +13,12 @@ import java.util.ArrayList;
 
 import game.entities.*;
 import game.shaders.*;
+import game.phys.AABB;
 
 public class Renderer {
     public static final int MAX_POLYGONS = 32768;
     public static Renderer inst;
+    public static AABB playerAABB;
     
     // Engine settings:
 	int near_Clipping_Plane = 10;		// Objects closer than this value are culled.
@@ -33,7 +35,7 @@ public class Renderer {
     // Engine variables:
 	int speed = 0;
 
-	int[] trig_Table;
+	public static int[] trig_Table;
 	int[] l_Buf_1;
 	int[] l_Buf_2;
 	int[] l_Buf_3;
@@ -126,6 +128,8 @@ public class Renderer {
         generate_LUT();
         
         entities.clear();
+        
+        playerAABB = new AABB(-5, -5, 5, 5);
         
         inst = this;
     }
@@ -389,12 +393,12 @@ public class Renderer {
 			trig_Table[255]=-7;
 	}
     
-    private int get_Sin(int angle) {
+    public static int get_Sin(int angle) {
 		angle = angle & 0xFF;
 		return trig_Table[angle];
 	}
 
-	private int get_Cos(int angle) {
+	public static int get_Cos(int angle) {
 		angle = (angle+64) & 0xFF;
 		return trig_Table[angle];
 	}
@@ -656,6 +660,8 @@ public class Renderer {
 
 		z_Buffer_Index = 0;
         
+        ArrayList<Entity> despawned = null;
+        
         for (Entity entity : entities) {
             entity.tick();
             try {
@@ -663,6 +669,31 @@ public class Renderer {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            if (entity._despawn) {
+                if (despawned == null) despawned = new ArrayList<Entity>();
+                despawned.add(entity);
+            }
+            /*if (entity.aabb != null) {
+                if (entity.aabb.cloneMove(entity.x, entity.z).intersects(playerAABB.cloneMove(this.getCamX(), this.getCamZ()))) {
+                    System.out.println("Foo");
+                }
+            }*/
+            if (entity.aabb != null && entity.canCollide()) {
+                for (Entity entity2 : entities) {
+                    if (entity != entity2 && entity2.aabb != null) {
+                        if (entity.aabb.cloneMove(entity.x, entity.z)._intersects(entity2.aabb.cloneMove(entity2.x, entity2.z))) {
+                            entity.onCollision(entity2);
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (despawned != null) {
+            for (Entity entity : despawned) {
+                entities.remove(entity);
+            }
+            despawned.clear();
         }
 
 		if (z_Buffer_Index>0) {
@@ -678,6 +709,14 @@ public class Renderer {
 				z_Buffer[i][2],z_Buffer[i][3],
 				z_Buffer[i][4],z_Buffer[i][5]);
 		}
+    }
+    
+    public ArrayList<AABB> getEntityAABBs() {
+        ArrayList<AABB> ret = new ArrayList<AABB>();
+        for (Entity e : entities)
+            if (e.aabb != null)
+                ret.add(e.aabb.cloneMove(e.x, e.z));
+        return ret;
     }
     
     public void moveCamera(int dx, int dy, int dz) {
