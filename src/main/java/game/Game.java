@@ -7,6 +7,9 @@ import java.awt.Color;
 import java.awt.Event;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GraphicsEnvironment;
+import java.awt.GraphicsConfiguration;
+import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.jar.*;
@@ -20,6 +23,7 @@ import game.phys.AABB;
 public class Game extends JPanel implements Runnable {
 	boolean drawStats = false;
     boolean darkPalette = false;
+    boolean limitShaderColors = true;
     
     public PlayerController pc;
     
@@ -79,9 +83,17 @@ public class Game extends JPanel implements Runnable {
             this.scr_Height = height;
             
             // Set up a double buffer
-            bufferImage = new BufferedImage(width, height, 1);
+            //bufferImage = new BufferedImage(width, height, 1);
+            //bufferImage2 = new BufferedImage(width + 64, height + 64, 1);
+            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            GraphicsConfiguration gc = ge.getDefaultScreenDevice().getDefaultConfiguration();
+            bufferImage = gc.createCompatibleImage(width, height, Transparency.OPAQUE);
+            bufferImage2 = gc.createCompatibleImage(width + 64, height + 64, Transparency.OPAQUE);
+            
+            bufferImage.setAccelerationPriority(1);
+            bufferImage2.setAccelerationPriority(1);
+            
             buffer = bufferImage.getGraphics();
-            bufferImage2 = new BufferedImage(width + 64, height + 64, 1);
             buffer2 = bufferImage2.getGraphics();
             buffer2.setColor(CColor.LIGHTBLUE.getColor());
             buffer2.fillRect(0, 0, width + 64, height + 64);
@@ -242,7 +254,9 @@ public class Game extends JPanel implements Runnable {
                 "Solid polygons: ",
                 "Show FPS: ",
                 "Colodore palette: ",
+                "Limited shader palette: ",
                 "Shader dithering: ",
+                "Floyd-Steinberg dithering: ",
                 "Select shader"
             };
             
@@ -251,7 +265,9 @@ public class Game extends JPanel implements Runnable {
                 this.renderer.filled,
                 drawStats,
                 darkPalette,
-                TEDDither.ditherImage
+                limitShaderColors,
+                TEDDither.ditherImage,
+                TEDDither.floydSteinbergDithering
             };
             
             int i = 0;
@@ -283,7 +299,7 @@ public class Game extends JPanel implements Runnable {
                         drawStats = !drawStats;
                         break;
                     case 3:
-                        if (this.renderer.shader.getClass().getName() == "game.shaders.Flat") {
+                        if (this.renderer.shader.getClass().getName() == "game.shaders.Flat" || !limitShaderColors) {
                             darkPalette = !darkPalette;
                             if (darkPalette) {
                                 CColor.setPalette1();
@@ -297,9 +313,28 @@ public class Game extends JPanel implements Runnable {
                         }
                         break;
                     case 4:
-                        TEDDither.ditherImage = !TEDDither.ditherImage;
+                        limitShaderColors = !limitShaderColors;
+                        if (!limitShaderColors) {
+                            if (darkPalette) {
+                                CColor.setPalette1();
+                            } else {
+                                CColor.setPalette0();
+                            }
+                            buffer2.setColor(CColor.LIGHTBLUE.getColor());
+                            buffer2.fillRect(0, 0, scr_Width + 64, scr_Height + 64);
+                        } else if (this.renderer.shader.getClass().getName() != "game.shaders.Flat" && limitShaderColors) {
+                            TEDDither.setTEDPalette();
+                            buffer2.setColor(CColor.LIGHTBLUE.getColor());
+                            buffer2.fillRect(0, 0, scr_Width + 64, scr_Height + 64);
+                        }
                         break;
                     case 5:
+                        TEDDither.ditherImage = !TEDDither.ditherImage;
+                        break;
+                    case 6:
+                        TEDDither.floydSteinbergDithering = !TEDDither.floydSteinbergDithering;
+                        break;
+                    case 7:
                         this.pc.menuState = MENU_SHADERS;
                         this.pc.menuSel = -1;
                         this.pc.tempMenuSel = 0;
@@ -521,19 +556,21 @@ public class Game extends JPanel implements Runnable {
                 try {
                     Constructor constructor = clazz.getConstructor(new Class[] {});
                     this.renderer.shader = (Shader) constructor.newInstance();
-                    if (clazz.getName() == "game.shaders.Flat") {
-                        darkPalette = !darkPalette;
-                        if (darkPalette) {
-                            CColor.setPalette1();
+                    if (limitShaderColors) {
+                        if (clazz.getName() == "game.shaders.Flat") {
+                            darkPalette = !darkPalette;
+                            if (darkPalette) {
+                                CColor.setPalette1();
+                            } else {
+                                CColor.setPalette0();
+                            }
+                            buffer2.setColor(CColor.LIGHTBLUE.getColor());
+                            buffer2.fillRect(0, 0, scr_Width + 64, scr_Height + 64);
                         } else {
-                            CColor.setPalette0();
+                            TEDDither.setTEDPalette();
+                            buffer2.setColor(CColor.LIGHTBLUE.getColor());
+                            buffer2.fillRect(0, 0, scr_Width + 64, scr_Height + 64);
                         }
-                        buffer2.setColor(CColor.LIGHTBLUE.getColor());
-                        buffer2.fillRect(0, 0, scr_Width + 64, scr_Height + 64);
-                    } else {
-                        TEDDither.setTEDPalette();
-                        buffer2.setColor(CColor.LIGHTBLUE.getColor());
-                        buffer2.fillRect(0, 0, scr_Width + 64, scr_Height + 64);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -541,7 +578,7 @@ public class Game extends JPanel implements Runnable {
             }
         }
         
-        if (this.renderer.shader.getClass().getName() != "game.shaders.Flat") {
+        if (this.renderer.shader.getClass().getName() != "game.shaders.Flat" && this.limitShaderColors) {
             buffer2.drawImage(TEDDither.dither(bufferImage), 32, 32, scr_Width, scr_Height, null);
         } else {
             buffer2.drawImage(bufferImage, 32, 32, scr_Width, scr_Height, null);

@@ -1,11 +1,61 @@
 package game;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
 
 public class TEDDither {
+    static class C3 {
+        int r, g, b;
+
+        public C3(int c) {
+            Color color = new Color(c);
+            r = color.getRed();
+            g = color.getGreen();
+            b = color.getBlue();
+        }
+
+        public C3(int r, int g, int b) {
+            this.r = r;
+            this.g = g;
+            this.b = b;
+        }
+
+        public C3 add(C3 o) {
+            return new C3(r + o.r, g + o.g, b + o.b);
+        }
+
+        public int clamp(int c) {
+            return Math.max(0, Math.min(255, c));
+        }
+
+        public int diff(C3 o) {
+            int Rdiff = o.r - r;
+            int Gdiff = o.g - g;
+            int Bdiff = o.b - b;
+            int distanceSquared = Rdiff * Rdiff + Gdiff * Gdiff + Bdiff * Bdiff;
+            return distanceSquared;
+        }
+
+        public C3 mul(double d) {
+            return new C3((int) (d * r), (int) (d * g), (int) (d * b));
+        }
+
+        public C3 sub(C3 o) {
+            return new C3(r - o.r, g - o.g, b - o.b);
+        }
+
+        public Color toColor() {
+            return new Color(clamp(r), clamp(g), clamp(b));
+        }
+
+        public int toRGB() {
+            return toColor().getRGB();
+        }
+    }
+    
     public static int[][] palette = new int[][] {
         {0, 0, 0},
         {23, 23, 23},
@@ -119,23 +169,18 @@ public class TEDDither {
         {255, 255, 201},
         {255, 255, 219}
     };
-    
-    public static CColor BLACK = new CColor("000000", 0);
-    public static CColor WHITE = new CColor("ffffff", 1);
-    public static CColor RED = new CColor("6d2327", 2);
-    public static CColor CYAN = new CColor("449690", 3);
-    public static CColor VIOLET = new CColor("792a82", 4);
-    public static CColor GREEN = new CColor("4ca144", 5);
-    public static CColor BLUE = new CColor("0f0d70", 6);
-    public static CColor YELLOW = new CColor("edf171", 7);
-    public static CColor ORANGE = new CColor("793d1a", 8);
-    public static CColor BROWN = new CColor("301700", 9);
-    public static CColor LIGHTRED = new CColor("b86267", 10);
-    public static CColor GREY1 = new CColor("373737", 11);
-    public static CColor GREY2 = new CColor("7b7b7b", 12);
-    public static CColor LIGHTGREEN = new CColor("a9ff9f", 13);
-    public static CColor LIGHTBLUE = new CColor("706deb", 14);
-    public static CColor GREY3 = new CColor("9b9b9b", 15);
+
+    private static C3 findClosestPaletteColor(C3 c, C3[] palette) {
+        C3 closest = palette[0];
+
+        for (C3 n : palette) {
+            if (n.diff(c) < closest.diff(c)) {
+                closest = n;
+            }
+        }
+
+        return closest;
+    }
     
     public static void setTEDPalette() {
         // TED (Plus-4, C16)
@@ -164,8 +209,11 @@ public class TEDDither {
     }
     
     public static boolean ditherImage = false;
+    public static boolean floydSteinbergDithering = false;
     
     public static IndexColorModel icm;
+    
+    public static C3[] c3palette;
     
     static {
         byte[] r = new byte[palette.length];
@@ -182,12 +230,59 @@ public class TEDDither {
         
         icm = new IndexColorModel(
                 7,  // 7 bits = 128 colors
-                palette.length,            
+                palette.length,
                 r, g, b
         );
+        
+        c3palette = new C3[palette.length];
+        i = 0;
+        for (int[] j : palette)
+            c3palette[i ++] = new C3(j[0], j[1], j[2]);
     }
     
-    public static BufferedImage dither(BufferedImage src) {
+    public static BufferedImage floydSteinbergDither(BufferedImage img) {
+        int w = img.getWidth();
+        int h = img.getHeight();
+
+        C3[][] d = new C3[h][w];
+
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                d[y][x] = new C3(img.getRGB(x, y));
+            }
+        }
+
+        for (int y = 0; y < img.getHeight(); y++) {
+            for (int x = 0; x < img.getWidth(); x++) {
+
+                C3 oldColor = d[y][x];
+                C3 newColor = findClosestPaletteColor(oldColor, c3palette);
+                img.setRGB(x, y, newColor.toColor().getRGB());
+
+                C3 err = oldColor.sub(newColor);
+
+                if (x + 1 < w) {
+                    d[y][x + 1] = d[y][x + 1].add(err.mul(7. / 16));
+                }
+                
+                if (x - 1 >= 0 && y + 1 < h) {
+                    d[y + 1][x - 1] = d[y + 1][x - 1].add(err.mul(3. / 16));
+                }
+                
+                if (y + 1 < h) {
+                    d[y + 1][x] = d[y + 1][x].add(err.mul(5. / 16));
+                }
+                
+                if (x + 1 < w && y + 1 < h) {
+                    d[y + 1][x + 1] = d[y + 1][x + 1].add(err.mul(1. / 16));
+                }
+            }
+        }
+
+        return img;
+    }
+    
+    public static BufferedImage colorModelDither(BufferedImage src) {
         BufferedImage img = new BufferedImage(
                 src.getWidth(), src.getHeight(),
                 BufferedImage.TYPE_BYTE_INDEXED,
@@ -208,5 +303,26 @@ public class TEDDither {
         }
             
         return img;
+    }
+    
+    public static BufferedImage dither(BufferedImage src) {
+        if (ditherImage) {
+            if (floydSteinbergDithering) {
+                return floydSteinbergDither(src);
+            } else {
+                return colorModelDither(src);
+            }
+        } else {
+            BufferedImage img = new BufferedImage(
+                src.getWidth(), src.getHeight(),
+                BufferedImage.TYPE_BYTE_INDEXED,
+                icm);
+            for (int x = 0; x < src.getWidth(); x++) {
+                for (int y = 0; y < src.getHeight(); y++) {
+                    img.setRGB(x, y, src.getRGB(x, y));
+                }
+            }
+            return img;
+        }
     }
 }
